@@ -1,0 +1,3 @@
+/home/srd/Downloads/FHIR_app_14apr25/build/CMakeFiles/rebuild_cache.dir
+/home/srd/Downloads/FHIR_app_14apr25/build/CMakeFiles/edit_cache.dir
+/home/srd/Downloads/FHIR_app_14apr25/build/CMakeFiles/FHIR.dir
