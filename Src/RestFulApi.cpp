@@ -34,12 +34,16 @@
 #include <functional>
 
 #include "RestFulApi.h"
+#include "json.hpp"
+
 
 /*
  * ****************************************************************************
  * Namespaces
  * ****************************************************************************
  */
+
+using json = nlohmann::json;
 
 /*
 ***********************************************************************
@@ -86,23 +90,17 @@ RestFulApi::RestFulApi(void)
   // Constructor
   // Bind member functions using std::bind and store them in restEndpoints map
   restEndpoints = {
-    {"/endpoint1", std::bind(&RestFulApi::endpoint1Handler, this, std::placeholders::_1, std::placeholders::_2)},
-    {"/endpoint2", std::bind(&RestFulApi::endpoint2Handler, this, std::placeholders::_1, std::placeholders::_2)},
-    {"/endpoint3", std::bind(&RestFulApi::endpoint3Handler, this, std::placeholders::_1, std::placeholders::_2)}
+    {"GET /endpoint1", std::bind(&RestFulApi::endpoint1Handler, this, std::placeholders::_1, std::placeholders::_2)},
+    {"POST /endpoint2", std::bind(&RestFulApi::endpoint2Handler, this, std::placeholders::_1, std::placeholders::_2)},
+    {"GET /endpoint3", std::bind(&RestFulApi::endpoint3Handler, this, std::placeholders::_1, std::placeholders::_2)}
   };
 }
 
 // ////////////////////////////////////////////////////////////////////////////
 RestFulApi::~RestFulApi(void)
 {
- //   if (0 != atexit(Deinit))
- //   {
- //     CPRINTF_(INIT, TEXTCOLOR_RED, "Error! 0 != atexit(Deinit)");
- //   }
-
   // Destructor
-
- }
+}
 
 // ////////////////////////////////////////////////////////////////////////////
 void RestFulApi::InitRestFulApi(void)
@@ -205,27 +203,20 @@ void RestFulApi::ParseInMessage(int fdWebClient, char buffer[]){
   // Parse the request to find the HTTP method and the endpoint (e.g., GET /simpleGET)
   size_t methodEnd = request.find(" ");  // Find the space after the method (GET, POST, etc.)
   std::string method = request.substr(0, methodEnd);  // Extract HTTP method (GET, POST, etc.)
-
   size_t endpointStart = methodEnd + 1;  // Start of the endpoint (after the space)
   size_t endpointEnd = request.find(" ", endpointStart);  // End of the endpoint
-  std::string endpointCalled = request.substr(endpointStart, endpointEnd - endpointStart);  // Extract endpoint
+  std::string endpointCalled = request.substr(0,endpointEnd);
 
-  // Log the method and endpoint for debugging
   std::cout << "Method: " << method << std::endl;
   std::cout << "Endpoint: " << endpointCalled << std::endl;
-  bool isFound = false;
-  for(const auto& endpoint : restEndpoints){
-    if(endpoint.first == endpointCalled){
-      isFound = true;
-      endpoint.second(fdWebClient,request);
-      break;
-    }
-  }
-  if(!isFound){
+
+  auto it = restEndpoints.find(endpointCalled);
+  if( it != restEndpoints.end()){
+    it->second(fdWebClient, request);
+  }else{
     SendHttpResponse(fdWebClient,"Not Found","application/json","HTTP/1.1 404 Not Found");
   }
   close(fdWebClient);
-
 }
 
 void RestFulApi::ParseInMessage(void)
@@ -274,8 +265,25 @@ void RestFulApi::endpoint1Handler(int webClinet_fd,std::string request){
   SendHttpResponse(webClinet_fd,response,"application/json","HTTP/1.1 200 OK");
 }
 void RestFulApi::endpoint2Handler(int webClinet_fd,std::string request){
-  std::string response = "hello from endpoint2";
+
+  std::string response;
+  size_t bodyStart = request.find("\r\n\r\n");
+  if(bodyStart != std::string::npos){
+    std::string jsonBody = request.substr(bodyStart + 4);
+    try{
+      json jsonData = json::parse(jsonBody);
+      std::cout << "Parsed JSON : " << jsonData.dump(4) << std::endl;
+      //std::string str1 = jsonData["key1"], str2 = jsonData["key2"]; Way of Accessing Json Data
+      response = "Received JSON: " + jsonData.dump();
+    }catch(const json::parse_error e){
+      std::cout<< "Something went wrong while parsing JSON"<<std::endl;
+    }
+  }else{
+    response = "hello from endpoint2";
+  }
+  
   SendHttpResponse(webClinet_fd,response,"application/json","HTTP/1.1 200 OK");
+
 }
 void RestFulApi::endpoint3Handler(int webClinet_fd,std::string request){
   std::string response = "hello from endpoint3";
@@ -283,5 +291,5 @@ void RestFulApi::endpoint3Handler(int webClinet_fd,std::string request){
 }
 
 
-// code ends
+
 
