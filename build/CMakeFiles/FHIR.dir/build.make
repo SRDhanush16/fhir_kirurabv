@@ -94,6 +94,8 @@ FHIR_EXTERNAL_OBJECTS =
 FHIR: CMakeFiles/FHIR.dir/Src/Fhir.cpp.o
 FHIR: CMakeFiles/FHIR.dir/Src/RestFulApi.cpp.o
 FHIR: CMakeFiles/FHIR.dir/build.make
+FHIR: /usr/lib/x86_64-linux-gnu/libssl.so
+FHIR: /usr/lib/x86_64-linux-gnu/libcrypto.so
 FHIR: CMakeFiles/FHIR.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/srd/Downloads/FHIR_app_14apr25/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking CXX executable FHIR"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/FHIR.dir/link.txt --verbose=$(VERBOSE)

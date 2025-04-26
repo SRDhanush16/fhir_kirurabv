@@ -26,6 +26,8 @@
 #include <string>
 #include <stdio.h>
 #include <map>
+#include <openssl/ssl.h>
+#include <openssl/err.h>
 
 #include "RestFulApi.h"
 #include "Fhir.h"
@@ -36,6 +38,6 @@ static RestFulApi* fhirServer = new RestFulApi();
 // ////////////////////////////////////////////////////////////////////////////
 int main(void)
 {
-  fhirServer->InitRestFulApi();
-  fhirServer->listenSocketFhir();
+  SSL_CTX* ctx = fhirServer->InitRestFulApi();
+  fhirServer->listenSocketFhir(ctx);
 }

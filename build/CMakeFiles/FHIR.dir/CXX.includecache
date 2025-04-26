@@ -37,6 +37,12 @@ map
 -
 functional
 -
+openssl/ssl.h
+-
+openssl/rand.h
+-
+openssl/err.h
+-
 RestFulApi.h
 /home/srd/Downloads/FHIR_app_14apr25/Src/RestFulApi.h
 json.hpp
@@ -46,6 +52,10 @@ json.hpp
 map
 -
 functional
+-
+openssl/ssl.h
+-
+openssl/rand.h
 -
 
 /home/srd/Downloads/FHIR_app_14apr25/Src/json.hpp

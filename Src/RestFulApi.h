@@ -19,6 +19,8 @@
 
 #include <map>
 #include <functional>
+#include <openssl/ssl.h>
+#include <openssl/rand.h>
 
 /*
 ***********************************************************************
@@ -64,20 +66,20 @@ public:
    /*_--------------------------------------------------------------------------*/
    /** RestFulApi init functions
     */
-   void InitRestFulApi();
+   SSL_CTX* InitRestFulApi();
 
    
    /*_--------------------------------------------------------------------------*/
    /** listen for socket messages
     */
-   void listenSocketFhir(void);
+   void listenSocketFhir(SSL_CTX* ctx);
 
    /*_--------------------------------------------------------------------------*/
    /** RestEnpoints
     */
-   void endpoint1Handler(int webClient_fd, std::string request);
-   void endpoint2Handler(int webClient_fd, std::string request);
-   void endpoint3Handler(int webClient_fd, std::string request);
+   void endpoint1Handler(SSL* ssl, std::string request);
+   void endpoint2Handler(SSL* ssl, std::string request);
+   void endpoint3Handler(SSL* ssl, std::string request);
 
 
    // ////////////////////////////////////////////////////////////////////////////
@@ -98,13 +100,12 @@ protected:
 private:
 
    char requestBuffer[DEFAULT_SOCKET_READ_BUFSIZE];
-   std::map<std::string, std::function<void(int, std::string)>> restEndpoints;
+   std::map<std::string, std::function<void(SSL*, std::string)>> restEndpoints;
 
    /*_--------------------------------------------------------------------------*/
    /** Parse incoming message
     */
-   void ParseInMessage(int fdWebClient, char buffer[]);
-   void ParseInMessage();
+   void ParseInMessage(SSL* ssl, int fdWebClient,char buffer[]);
 
    /*_--------------------------------------------------------------------------*/
    /** getCurDate
@@ -115,6 +116,14 @@ private:
    /** SendHttpResponse
     */
    int SendHttpResponse(u_int client, std::string response, std::string responseContent, std::string httpResponseCode);
+   int SendHttpsResponse(SSL* ssl, std::string response, std::string responseContent, std::string httpResponseCode);
+   /*_--------------------------------------------------------------------------*/
+   /** SSL
+    */
+   void handleErrors();
+   void initialize_ssl();
+   SSL_CTX* create_context();
+   void configure_ssl_context(SSL_CTX* ctx);
 
 };
 
